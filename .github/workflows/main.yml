@@ -1,16 +1,24 @@
+name: Main Branch Merge & FTP Copy
+
 on:
-  push:
-    branches:
-      - 'main'
-    paths:
-      - '**.cfg'
-name: Mod Config FTP transfer
+  workflow_dispatch:
 jobs:
-  web-deploy:
-    name: 🎉 Deploy
+  build:
     runs-on: ubuntu-latest
     steps:
-    - name: 🚚 Get latest code
+    - name: Check if it's a merge to main
+      run: |
+        if [ "${{ github.event_name }}" == "push" ] && [ "${{ github.ref }}" == "refs/heads/main" ]; then
+          echo "Branch is 'main', proceeding..."
+        else
+          echo "Branch is not 'main', exiting..."
+          exit 0
+        fi
+  web-deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+    - name: Get latest code
       uses: actions/checkout@v3
 
     - name: 📂 Sync files
@@ -22,5 +30,5 @@ jobs:
         exclude: |
           **/.git*
           **/.git*/**
-          **/node_modules/**
-          fileToExclude.txt
+          **/archive/**
+          README.md
